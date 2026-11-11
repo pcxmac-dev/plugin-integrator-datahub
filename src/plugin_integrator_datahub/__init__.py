@@ -12,11 +12,12 @@ someone else's data:
   monthly 1980-2017, a mirror frozen since 2017, so an archive (closed once imported). IMF terms:
   personal, non-commercial use.
 
-A Liminal plugin released on its own: Datahub, a PublisherPlugin subclass (plugin API 2.0, the class
+A Liminal plugin released on its own: Datahub, a PublisherPlugin subclass (plugin API 2.2, the class
 contract of liminal_libs.sources.publisher), and PUBLISHER its instance, registered under the entry
 point group `liminal.providers` as `datahub`. It relies on the contract (datasets declared by a
-publisher) and nothing of the app outside it (docs/ARCHITECTURE.md in liminal: "Providers are
-plugins"); its version is this distribution's (pyproject.toml), so Datahub.version is left empty.
+publisher; what it attaches to, apis.py: the core datasets, their files and history, their pages) and
+nothing of the app outside it (docs/ARCHITECTURE.md in liminal: "Providers are plugins"); its version is
+this distribution's (pyproject.toml), so Datahub.version is left empty.
 """
 from __future__ import annotations
 
@@ -27,7 +28,7 @@ from datetime import date
 from liminal_libs.sources.dataset import Dataset, Parsed, months_after, ms, num, text
 from liminal_libs.sources.publisher import Policy, PublisherPlugin
 
-RAW = "https://raw.githubusercontent.com/datasets/"
+from .apis import APIS, RAW  # RAW: "https://raw.githubusercontent.com/datasets/", the repositories' files
 
 
 def shiller_date(raw: str) -> date:
@@ -123,10 +124,11 @@ DATASETS = (
 class Datahub(PublisherPlugin):
     """Datahub's core datasets as a publisher: someone else's data republished (kind mirror) with no
     feeds, its three datasets fetched from GitHub alone, inside its scrape checks. What it declares
-    are class attributes; it has no hook of its own (no release moments, no calendar, no read of its
-    own: the contract's defaults)."""
+    are class attributes (what it attaches to among them: `apis`, the core datasets' card); it has no
+    hook of its own (no release moments, no calendar, no read of its own, nothing learned for
+    api_facts: the contract's defaults)."""
 
-    api = "2.0"  # the contract it needs (the class contract); its version: the distribution's
+    api = "2.2"  # the contract it needs (2.2: what it attaches to); its version: the distribution's
     name = "datahub"
     title = "Datahub"
     order = 410
@@ -135,6 +137,7 @@ class Datahub(PublisherPlugin):
              "IMF commodity prices (datasets)")
     feeds = ()
     datasets = DATASETS
+    apis = APIS  # the core datasets, their files and history, their pages (apis.py)
     policy = Policy(hosts=("github.com", "raw.githubusercontent.com"), min_minutes=60, per_day=40,
                     terms="ODC Public Domain Dedication and License (PDDL); each dataset's own source's "
                           "terms besides (the IMF's: personal, non-commercial use)",

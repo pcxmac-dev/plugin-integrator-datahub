@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0 (2026-11-11)
+
+Its API on its page (plugin API 2.2, liminal-libs 1.49.0; the user: "each plugin should reflect the the API its
+attached to, and present links that provide documentation, the plugin interface should more or less contain what it
+already has, BUT, it should also expose more of what the API is about"). `Datahub.apis` (apis.py) is the card of
+Datahub's core datasets: data packages in the `datasets` organization's GitHub repositories, read as raw files or as
+their git history, with Datahub's and GitHub's pages (Core Data, the core datasets, the organization, the curators'
+guide, the Data Package standard, the terms), its parts (the three datasets it reads, the raw files and the commit
+history; the data packages' descriptions, Datahub's file links and the other finance datasets it does not read) and
+its calls (the three files and the four git commands the app makes for it, and the others), verified 2026-11-11.
+Nothing it reads or does changes; it learns nothing while it runs, so `api_facts()` says nothing. Needs
+liminal-libs>=1.49.0. A test checks that the card names the files and the history the plugin really reads;
+`LIMINAL_VENDOR_PAGES=1` asks each address on it.
+
 ## 0.2.0 (2026-11-03)
 
 Renamed `plugin-integrator-datahub` (the package `plugin_integrator_datahub`; it was `liminal-plugin-datahub`) on 2026-11-03: the naming by system (plugins are `plugin-<app>-<name>`), on liminal-libs 1.4.0 (`liminal_libs`, the library renamed with it).

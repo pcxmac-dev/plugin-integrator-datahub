@@ -5,12 +5,25 @@ from __future__ import annotations
 
 from datetime import date
 from importlib.metadata import version
+from pathlib import Path
 
 from liminal_libs.sources import publishers, registry
 from liminal_libs.sources.publisher import PublisherPlugin
 
 import plugin_integrator_datahub as datahub
 from plugin_integrator_datahub import Datahub
+
+
+def own_version(p) -> str:
+    """The version the app shows for it: its checkout's pyproject.toml when it is loaded from the workspace's
+    plugin directory (an editable install's metadata can lag behind a release), else its installed
+    distribution's."""
+    if p.origin.startswith("plugins/"):
+        import tomllib
+
+        pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"
+        return tomllib.loads(pyproject.read_text(encoding="utf-8"))["project"]["version"]
+    return version("plugin-integrator-datahub")
 
 
 def test_commodities_skip_missing_cells():
@@ -43,11 +56,11 @@ def test_constituents_carry_the_market_maps_sector_names():
 
 
 def test_it_is_a_class_on_the_plugin_contract():
-    """The publisher is an instance of its class (plugin API 2.0), what it declares its class's
+    """The publisher is an instance of its class (plugin API 2.2), what it declares its class's
     attributes, its hooks the contract's defaults; the app loads it as that class."""
     p = datahub.PUBLISHER
     assert type(p) is Datahub and issubclass(Datahub, PublisherPlugin) and not p.is_record
-    assert p.api == "2.0" and Datahub.api == "2.0" and p.KIND == "publisher"
+    assert p.api == "2.2" and Datahub.api == "2.2" and p.KIND == "publisher"
     assert not p.has_moments and not p.has_calendar and not p.reads_itself and not p.has_settings
     assert p.moments(date(2026, 11, 3)) == () and p.calendar(date(2026, 11, 3)) == []  # the contract's defaults
     assert Datahub.datasets is datahub.DATASETS and p.datasets == datahub.DATASETS
@@ -55,7 +68,7 @@ def test_it_is_a_class_on_the_plugin_contract():
     assert type(moved) is Datahub and moved.order == 1 and p.order == 410 and moved.datasets == p.datasets
     registry.reload()
     loaded = publishers()["datahub"]
-    assert type(loaded) is Datahub and loaded.api == "2.0" and loaded.version == version("plugin-integrator-datahub")
+    assert type(loaded) is Datahub and loaded.api == "2.2" and loaded.version == own_version(loaded)
     assert registry.api_refusal(loaded.api, record=loaded.is_record) is None
     assert not [why for where, why in registry.errors() if "datahub" in where or "datahub" in why]
 
@@ -65,8 +78,8 @@ def test_the_app_loads_it_from_this_package_with_its_own_version():
     p = publishers().get("datahub")
     assert p is not None, dict(registry.errors())
     assert p.origin in {"package: plugin-integrator-datahub (plugin_integrator_datahub:PUBLISHER)", "plugins/plugin-integrator-datahub (plugin_integrator_datahub:PUBLISHER)"}  # its package, or its checkout in the workspace\'s plugin directory
-    assert p.version == version("plugin-integrator-datahub") and datahub.PUBLISHER.version == ""
-    assert registry.api_refusal(p.api) is None and p.api == "2.0"
+    assert p.version == own_version(p) and datahub.PUBLISHER.version == ""
+    assert registry.api_refusal(p.api) is None and p.api == "2.2"
     assert not [why for where, why in registry.errors() if "datahub" in where or "datahub" in why]
     assert (p.title, p.kind, p.feeds) == ("Datahub", "mirror", ())
     assert {d.name: (d.provider, d.git) for d in p.datasets} == {

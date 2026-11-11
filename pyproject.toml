@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "plugin-integrator-datahub"
-version = "0.2.0"  # the plugin's own release (CHANGELOG.md); the app shows it on the Plugins view
+version = "0.3.0"  # the plugin's own release (CHANGELOG.md); the app shows it on the Plugins view
 description = "Datahub's core datasets for Liminal: the S&P 500's members and sectors, Shiller's market data from 1871 and the IMF's commodity prices, version by version."
 readme = "README.md"
 requires-python = ">=3.10"
 # the app it plugs into; which of its releases can load it is the plugin API the plugin declares
 # (PLUGIN.api, checked when the app loads it), not this line
-dependencies = ["liminal-libs>=1.4.0"]
+dependencies = ["liminal-libs>=1.49.0"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
